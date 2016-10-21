@@ -42,7 +42,7 @@
         function createMarkers() {
          var markers = [];
         	json['data'].forEach(function(movie, i) {
-          geocoder.geocode( { 'address': movie[10]}, function(results, status) {
+          setTimeout(geocoder.geocode( { 'address': movie[10]}, function(results, status) {
       			if (status == 'OK') {
         				markers.push(new google.maps.Marker({
             position: results[0].geometry.location,
@@ -52,7 +52,7 @@
       } else {
         console.log('Geocode was not successful for the following reason: ' + status);
       }
-    });
+    }), 20);
 
         });
         
