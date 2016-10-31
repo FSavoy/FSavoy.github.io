@@ -17,6 +17,7 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
 		<script src="sfFilming.js"></script>
+		<script src="maps.js"></script>
 	</head>
 	
 	<body ng-app="sfFilming" ng-controller="moviesCtrl">
@@ -33,8 +34,9 @@
 
 	<div class="col-md-3">
 		<div class="form-group">
-			<input type="text" class="form-control" id="search-field" placeholder="Search by ...">
+			<input type="text" class="form-control" id="search-field" placeholder="Search by ..." ng-model="searchQuery">
 		</div>
+		
 		<div class="list-group" id="list-warning" ng-hide="sucessful">
 			<div class="list-group-item">
 				<p class="list-group-item-text">{{ infoText }}</p>
@@ -42,9 +44,18 @@
 		</div>
 		
 		<div class="list-group" id="list-elems" ng-show="sucessful">
-			<a href="#" class="list-group-item" ng-repeat="m in movies" ng-click="click($index)" ng-class="{'active': selected == $index}">
+			<a href="#" class="list-group-item" ng-repeat="m in movies | filter : filterFct" ng-click="click(m.index)" ng-class="{'active': selected == m.index}">
 				<h4 class="list-group-item-heading">{{ m.title }}</h4>
-				<p class="list-group-item-text small" ng-repeat="l in m.locations track by $index">{{ l }}</p>
+				<p class="list-group-item-text small" ng-repeat="l in m.locations track by $index" ng-hide="searchQuery.length > 1">{{ l }}</p>
+				<p class="list-group-item-text" ng-repeat="l in m.locations track by $index" ng-show="searchQuery.length > 1 && l && l.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-map-marker" title="Location"></span> {{ l }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.release_year && m.release_year.indexOf(searchQuery) != -1"><span class="glyphicon glyphicon-calendar" title="Year"></span> {{ m.release_year }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.production_company && m.production_company.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-home" title="Production company"></span> {{ m.production_company }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.distributor && m.distributor.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-cd" title="Distributor"></span> {{ m.distributor }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.director && m.director.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-bullhorn" title="Director"></span> {{ m.director }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.writer.toLowerCase() && m.writer.indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-pencil" title="Writer"></span> {{ m.writer }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.actor_1 && m.actor_1.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-user" title="Actor 1"></span> {{ m.actor_1 }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.actor_2 && m.actor_2.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-user" title="Actor 2"></span> {{ m.actor_2 }}</p>
+				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.actor_3 && m.actor_3.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-user" title="Actor 3"></span> {{ m.actor_3 }}</p>
 			</a>
 		</div>
 	</div>
@@ -61,7 +72,7 @@
 				<table class="table table-condensed">
 					<tr ng-show="movies[selected].locations[0]">
 						<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
-						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations">{{ l }}</p></td>
+						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{ l }}</p></td>
 					</tr>
 					<tr ng-show="movies[selected].release_year">
 						<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>

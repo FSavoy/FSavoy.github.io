@@ -33,7 +33,7 @@
         return markers;
         };
         
-        createMarkers();
+        //createMarkers();
 
         // Add a marker clusterer to manage the markers.
         //var markerCluster = new MarkerClusterer(map, createMarkers(),
