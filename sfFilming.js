@@ -51,7 +51,7 @@ app.controller('moviesCtrl', function($scope, $http) {
 			return true;
 		}
     	 	
-		var concatElems = [m.locations.join(), m.release_year, m.production_company, m.distributor, m.director, m.writer, m.actor_1, m.actor_2, m.actor_3].join().toLowerCase();
+		var concatElems = [m.title, m.locations.join(), m.release_year, m.production_company, m.distributor, m.director, m.writer, m.actor_1, m.actor_2, m.actor_3].join().toLowerCase();
 		if (concatElems.indexOf($scope.searchQuery.toLowerCase()) == -1){
 			return false;
 		} else {
