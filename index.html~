@@ -16,7 +16,9 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJeTiHs5qcrJw8EOxdIODgCH2zWca9tfo"></script>
 		<script src="sfFilming.js"></script>
+
 	</head>
 	
 	<body ng-app="sfFilming" ng-controller="moviesCtrl">
@@ -61,6 +63,8 @@
 
 	<div class="col-md-9" id="map-content">
 		<div class="panel panel-default" id="map"></div>
+		<ng-map zoom="14" center="[43.6650000, -79.4103000]">
+    </ng-map>
 		
 		<div class="panel panel-default" id="detail-panel" ng-hide="selected == null">
 			<div class="panel-heading">
@@ -71,7 +75,7 @@
 				<table class="table table-condensed">
 					<tr ng-show="movies[selected].locations[0]">
 						<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
-						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{ l }}</p></td>
+						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} {{l}}</p></td>
 					</tr>
 					<tr ng-show="movies[selected].release_year">
 						<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>
@@ -110,7 +114,5 @@
 		</div>
 	</div>
     
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJeTiHs5qcrJw8EOxdIODgCH2zWca9tfo&callback=initMap"></script>
   </body>
 </html>
