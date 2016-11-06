@@ -17,6 +17,7 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJeTiHs5qcrJw8EOxdIODgCH2zWca9tfo"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/2.5.0/fuse.min.js"></script>
 		<script src="sfFilming.js"></script>
 
 	</head>
@@ -45,26 +46,26 @@
 		</div>
 		
 		<div class="list-group" id="list-elems" ng-show="sucessful">
-			<a href="#" class="list-group-item" ng-repeat="m in movies | filter : filterFct" ng-click="click(m.index)" ng-class="{'active': selected == m.index}">
+			<a href="#" class="list-group-item" ng-repeat="m in movies" ng-click="click(m.index)" ng-class="{'active': selected == m.index}" ng-hide="searchQuery" ng-mouseenter="hoverIn(m.index)" ng-mouseleave="hoverOut(m.index)">
 				<h4 class="list-group-item-heading">{{ m.title }}</h4>
-				<p class="list-group-item-text small" ng-repeat="l in m.locations track by $index" ng-hide="searchQuery.length > 1">{{ l }}</p>
-				<p class="list-group-item-text" ng-repeat="l in m.locations track by $index" ng-show="searchQuery.length > 1 && l && l.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-map-marker" title="Location"></span> {{ l }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.release_year && m.release_year.indexOf(searchQuery) != -1"><span class="glyphicon glyphicon-calendar" title="Year"></span> {{ m.release_year }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.production_company && m.production_company.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-home" title="Production company"></span> {{ m.production_company }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.distributor && m.distributor.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-cd" title="Distributor"></span> {{ m.distributor }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.director && m.director.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-bullhorn" title="Director"></span> {{ m.director }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.writer.toLowerCase() && m.writer.indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-pencil" title="Writer"></span> {{ m.writer }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.actor_1 && m.actor_1.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-user" title="Actor 1"></span> {{ m.actor_1 }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.actor_2 && m.actor_2.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-user" title="Actor 2"></span> {{ m.actor_2 }}</p>
-				<p class="list-group-item-text" ng-show="searchQuery.length > 1 && m.actor_3 && m.actor_3.toLowerCase().indexOf(searchQuery.toLowerCase()) != -1"><span class="glyphicon glyphicon-user" title="Actor 3"></span> {{ m.actor_3 }}</p>
+			</a>
+			<a href="#" class="list-group-item" ng-repeat="m in results" ng-click="click(m.item.index)" ng-class="{'active': selected == m.item.index}" ng-show="searchQuery" ng-mouseenter="hoverIn(m.item.index)" ng-mouseleave="hoverOut(m.item.index)">
+				<h4 class="list-group-item-heading" ng-bind-html="m.item.title | highlight:searchQuery"></h4>
+				
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'release_year'}"><span class="glyphicon glyphicon-calendar" title="Year"></span><span ng-bind-html="m.item.release_year | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'production_company'}"><span class="glyphicon glyphicon-home" title="Production company"></span><span ng-bind-html="m.item.production_company | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'distributor'}"><span class="glyphicon glyphicon-cd" title="Distributor"></span><span ng-bind-html="m.item.distributor | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'director'}"><span class="glyphicon glyphicon-bullhorn" title="Director"></span><span ng-bind-html="m.item.director | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'writer'}"><span class="glyphicon glyphicon-pencil" title="Writer"></span><span ng-bind-html="m.item.writer | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_1'}"><span class="glyphicon glyphicon-user" title="Actor 1"></span><span ng-bind-html="m.item.actor_1 | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_2'}"><span class="glyphicon glyphicon-user" title="Actor 2"></span><span ng-bind-html="m.item.actor_2 | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_3'}"><span class="glyphicon glyphicon-user" title="Actor 3"></span><span ng-bind-html="m.item.actor_3 | highlight:searchQuery"></span></p>
 			</a>
 		</div>
 	</div>
 
 	<div class="col-md-9" id="map-content">
 		<div class="panel panel-default" id="map"></div>
-		<ng-map zoom="14" center="[43.6650000, -79.4103000]">
-    </ng-map>
 		
 		<div class="panel panel-default" id="detail-panel" ng-hide="selected == null">
 			<div class="panel-heading">

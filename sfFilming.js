@@ -1,6 +1,18 @@
+// Extending the string class to insert at specific location
+String.prototype.insertAt=function(index, string) { 
+  return this.substr(0, index) + string + this.substr(index);
+}
+
+// Sorting and removing duplicates from an array
+function uniq(a) {
+    return a.sort().filter(function(item, pos, ary) {
+        return !pos || item != ary[pos - 1];
+    })
+}
+
 var app = angular.module('sfFilming', []);
 
-app.controller('moviesCtrl', function($scope, $http) {
+app.controller('moviesCtrl', function($scope, $http, $sce) {
 	$scope.sucessful = false;
 	$scope.infoText = "Loading...";	
 	$scope.selected = null;
@@ -10,6 +22,29 @@ app.controller('moviesCtrl', function($scope, $http) {
 	$scope.locations = []; // Stores all the locations
 	$scope.locationsMoviesIdx = []; // Stores the movies indexes corresponding to the locations
 	$scope.markers = [];
+	
+	// The options for Fuse
+	var options = {
+		threshold: 0.2,
+		location: 0,
+		distance: 100,
+		maxPatternLength: 32,
+		include: ["matches"],
+		keys: [
+			"title",
+			"release_year",
+			"production_company",
+			"distributor",
+			"director",
+			"writer",
+			"actor_1",
+			"actor_2",
+			"actor_3"
+		]
+	};
+	
+	$scope.fuse = new Fuse($scope.movies, options);
+	$scope.results = [];
 	
 	$scope.map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 11,
@@ -21,14 +56,6 @@ app.controller('moviesCtrl', function($scope, $http) {
    	url: 'http://maps.google.com/mapfiles/ms/micons/grey.png',
       scaledSize: new google.maps.Size(20, 20)
    };
-   
-   // The marker image when selected
-   $scope.markerImgSelected = {
-   	url: 'http://maps.google.com/mapfiles/ms/micons/blue.png',
-      scaledSize: new google.maps.Size(32, 32),
-      labelOrigin: new google.maps.Point(16,10)
-   };
-
 	
 	$http.get("https://data.sfgov.org/resource/wwmu-gmzc.json")
 	.then(function(response) {
@@ -60,6 +87,7 @@ app.controller('moviesCtrl', function($scope, $http) {
 					elem.fun_facts = [elem.fun_facts];
 				} else {
 					elem.locations = [];
+					elem.locationsConcat = '';
 					elem.locationsIdx = [];
 					elem.fun_facts = [];
 				}
@@ -107,6 +135,54 @@ app.controller('moviesCtrl', function($scope, $http) {
 		$scope.infoText = "Error loading data: " + response.statusText;
 	});
 	
+	// Updating the results of the search when the search term is changed
+	$scope.$watch('searchQuery', function(newVal,oldVal){
+
+		if($scope.searchQuery){
+			$scope.results = $scope.fuse.search($scope.searchQuery);
+			
+			// Check in the next loop if the selected movie is still in the list of results
+			var removeSelected = true;
+			
+			// Updating the markers (hiding)
+			var toShow = [];
+			for(var i = 0; i < $scope.results.length; i++){
+				toShow = toShow.concat($scope.results[i].item.locationsIdx);
+				
+				if ($scope.selected == $scope.results[i].item.index){
+					removeSelected = false;				
+				}
+			}
+			
+			if(removeSelected){
+				$scope.selected = null;			
+			}			
+			
+			toShow = uniq(toShow);
+			for(var i = 0; i < toShow.length; i++){
+				$scope.markers[toShow[i]].setMap($scope.map);		
+			}
+		
+			// toHide: all markers except those to Show
+			var toHide = Array.apply(null, {length: $scope.markers.length}).map(Number.call, Number)
+			toHide = toHide.filter( function( el ) {
+				return toShow.indexOf( el ) < 0;
+			});
+			for(var i = 0; i < toHide.length; i++){
+				$scope.markers[toHide[i]].setMap(null);
+			}
+		} else {
+			$scope.results = [];
+			
+			// Show all markers
+			for(var i = 0; i < $scope.markers.length; i++){
+				$scope.markers[i].setMap($scope.map);		
+			}
+		}
+		
+		
+	});
+	
 	// Changing colors and numbers of markers when a movie is selected
 	$scope.$watch('selected',function(newVal,oldVal){
 
@@ -114,7 +190,6 @@ app.controller('moviesCtrl', function($scope, $http) {
 			var selectedMovieLocs = $scope.movies[oldVal].locationsIdx;
 			for (var m = 0; m < selectedMovieLocs.length; m++){
 				var locIdx = selectedMovieLocs[m];
-				$scope.markers[locIdx].setLabel(null);
 				$scope.markers[locIdx].setIcon($scope.markerImg);
 			}
 		}
@@ -134,8 +209,8 @@ app.controller('moviesCtrl', function($scope, $http) {
    					text: (m+1).toString()
    				}
 				}
-				$scope.markers[locIdx].setLabel(markerLabel);
-				$scope.markers[locIdx].setIcon($scope.markerImgSelected);
+				$scope.markers[locIdx].setAnimation(null);
+				$scope.markers[locIdx].setIcon('markers/icon-big-' + (m+1).toString() + '.png');
 			}
 		}
 	});
@@ -147,17 +222,31 @@ app.controller('moviesCtrl', function($scope, $http) {
 			$scope.selected = index;
 		}
 	};
-    
-	$scope.filterFct = function(m){
-		if ($scope.searchQuery.length < 2){
-			return true;
-		}
-    	 	
-		var concatElems = [m.title, m.locations.join(), m.release_year, m.production_company, m.distributor, m.director, m.writer, m.actor_1, m.actor_2, m.actor_3].join().toLowerCase();
-		if (concatElems.indexOf($scope.searchQuery.toLowerCase()) == -1){
-			return false;
-		} else {
-			return true;
+	
+	$scope.hoverIn = function(index){
+		if (index != $scope.selected){
+			var indices = $scope.movies[index].locationsIdx;
+			for(var i = 0; i < indices.length ; i++){
+				$scope.markers[indices[i]].setAnimation(google.maps.Animation.BOUNCE);
+			}
 		}
 	};
+	
+	$scope.hoverOut = function(index){
+		var indices = $scope.movies[index].locationsIdx;
+		for(var i = 0; i < indices.length ; i++){
+			$scope.markers[indices[i]].setAnimation(null);
+		}
+	};
+    
 });
+
+app.filter('highlight', function($sce) {
+  return function(text, phrase) {
+  	console.log(text);
+    if (phrase) text = text.replace(new RegExp('('+phrase+')', 'gi'),
+      '<u>$1</u>')
+
+    return $sce.trustAsHtml(' ' + text)
+  }
+})
