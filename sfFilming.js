@@ -277,7 +277,7 @@ app.filter('highlightPos', function($sce) {
 	return function(text, match) {
   		var mark1 = match.indices[0][0];
   		var mark2 = match.indices[0][1];
-    	if (mark2){
+    	if (mark2 && mark2 > mark1){
     		text = text.insertAt(mark2+1, '</u>');
     		text = text.insertAt(mark1, '<u>');
    	}
