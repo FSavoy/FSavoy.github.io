@@ -95,7 +95,7 @@
 				<table class="table table-condensed">
 					<tr ng-show="movies[selected].locations[0]">
 						<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
-						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto bottom" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
+						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto left" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
 					</tr>
 					<tr ng-show="movies[selected].release_year">
 						<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>
@@ -145,7 +145,7 @@
 					<table class="table table-condensed">
 						<tr ng-show="movies[selected].locations[0]">
 							<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
-							<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto left" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
+							<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto bottom" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
 						</tr>
 						<tr ng-show="movies[selected].release_year">
 							<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>
