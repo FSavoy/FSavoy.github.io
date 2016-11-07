@@ -6,14 +6,14 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	$scope.currentLocation = '';
 	$scope.coordinates = [];
 	$scope.coordsJson = '';
-	$scope.index = 650;
+	$scope.index = 450;
 	$scope.currentLat = '';
 	$scope.currentLong = '';
 	$scope.result = "";
 	$scope.geocoder = new google.maps.Geocoder();
 	
 	$scope.map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 11,
+		zoom: 15,
 		center: new google.maps.LatLng(37.80, -122.33),
 	});
 	
@@ -46,14 +46,14 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 		}
 		
 		// Saving the data for geocoding
-		$scope.geocode(0);
+		$scope.geocode(450);
 		
 	}, function(response) {
 		console.log("Error loading data: " + response.statusText);
 	});
 	
 	$scope.$watch('index', function(){
-		if($scope.index >= $scope.locations.length && $scope.locations.length > 0){//done
+		if($scope.index >= $scope.locations.length && $scope.locations.length > 450){//done
 			$scope.currentLocation = "Done!";
 		} else {
 			if($scope.index != 0){
