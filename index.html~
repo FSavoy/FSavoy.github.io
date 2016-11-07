@@ -15,9 +15,10 @@
 		
 		<link rel="stylesheet" type="text/css" href="style.css">
 
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJeTiHs5qcrJw8EOxdIODgCH2zWca9tfo"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/2.5.0/fuse.min.js"></script>
+		<script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.2.0.js"></script>
 		<script src="sfFilming.js"></script>
 
 	</head>
@@ -77,7 +78,7 @@
 				<table class="table table-condensed">
 					<tr ng-show="movies[selected].locations[0]">
 						<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
-						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}}</p></td>
+						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto left" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
 					</tr>
 					<tr ng-show="movies[selected].release_year">
 						<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>

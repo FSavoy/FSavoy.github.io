@@ -10,7 +10,12 @@ function uniq(a) {
     })
 }
 
-var app = angular.module('sfFilming', []);
+// Initialize popover for fun facts
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+});
+
+var app = angular.module('sfFilming', ['ui.bootstrap']);
 
 app.controller('moviesCtrl', function($scope, $http, $sce) {
 	$scope.sucessful = false;
@@ -318,3 +323,19 @@ app.filter('highlightArray', function($sce) {
     	return $sce.trustAsHtml(' ' + text)
   }
 })
+
+// For popover to appear
+app.directive('tooltip', function(){
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs){
+            $(element).hover(function(){
+                // on mouseenter
+                $(element).tooltip('show');
+            }, function(){
+                // on mouseleave
+                $(element).tooltip('hide');
+            });
+        }
+    };
+});
