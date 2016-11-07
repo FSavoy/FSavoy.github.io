@@ -281,26 +281,37 @@ app.filter('highlightArray', function($sce) {
 			words = phrase.split(" ");
 			for (var i = 0; i< array.length; i++){
 				var loc = array[i];
-				var inside = true;
-				for(var j = 0; j < words.length; j++){
-					if(loc.toLowerCase().indexOf(words[j].toLowerCase()) == -1){
-						inside = false;
-					}
-				}
-				if(inside){
+				
+				// If full phrase in inside
+				if(loc.toLowerCase().indexOf(phrase.toLowerCase()) != -1){
+					loc = loc.replace(new RegExp('('+phrase+')', 'gi'),'<u>$1</u>')
+					
 					if(text == ''){
 						text = text + loc;
 					} else {
 						text = text + ', ' + loc;
 					}
-					
-				}			
+				} else { // Check if all the words are inside
+					var inside = true;
+					for(var j = 0; j < words.length; j++){
+						if(loc.toLowerCase().indexOf(words[j].toLowerCase()) == -1){
+							inside = false;
+						}
+					}
+					if(inside){
+						for(var j = 0; j < words.length; j++){
+							var word = words[j];
+							loc = loc.replace(new RegExp('('+word+')', 'gi'), '<u>$1</u>')
+						}
+						if(text == ''){
+							text = text + loc;
+						} else {
+							text = text + ', ' + loc;
+						}
+					}
+				}
 			}
-			for(var j = 0; j < words.length; j++){
-				var word = words[j];
-				text = text.replace(new RegExp('('+word+')', 'gi'),
-      '<u>$1</u>')
-			}
+			
 			
 		}
 
