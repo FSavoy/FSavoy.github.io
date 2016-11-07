@@ -179,7 +179,6 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			// We are done, with success!
 			$scope.sucessful = true;
 			$scope.infoText = "Sucess";
-			$scope.selected = 0; // Show details for the first movie of the row
 		
 		}, function(respGeo) { // Loading geocoding failed
 			$scope.infoText = "Error loading data: " + respGeo.statusText;
