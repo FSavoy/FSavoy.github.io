@@ -14,7 +14,7 @@ var app = angular.module('sfFilming', []);
 
 app.controller('moviesCtrl', function($scope, $http, $sce) {
 	$scope.sucessful = false;
-	$scope.infoText = "Loading...";	
+	$scope.infoText = "Loading...";
 	$scope.selected = null;
 	$scope.searchQuery = "";
 	
@@ -25,10 +25,11 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	
 	// The options for Fuse
 	var options = {
-		threshold: 0.1,
+		threshold: 0.05,
 		location: 0,
-		distance: 100,
+		distance: 10000,
 		maxPatternLength: 32,
+		tokenize: true,
 		matchAllTokens: true,
 		include: ["matches"],
 		keys: [
@@ -67,7 +68,6 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			
 			var retrieved = response.data;
 			var geocoding = response1.data;
-			console.log(geocoding);
 			
 			retrieved.sort(function(a, b) {
 				return [a.title, a.release_year].join().localeCompare([b.title, b.release_year].join());
@@ -162,7 +162,8 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	$scope.$watch('searchQuery', function(newVal,oldVal){
 
 		if($scope.searchQuery){
-			$scope.results = $scope.fuse.search($scope.searchQuery);
+			var searchQueryNoParenthesis = $scope.searchQuery.replace(/[()]/g, '')
+			$scope.results = $scope.fuse.search(searchQueryNoParenthesis);
 			
 			// Check in the next loop if the selected movie is still in the list of results
 			var removeSelected = true;
@@ -194,6 +195,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			for(var i = 0; i < toHide.length; i++){
 				$scope.markers[toHide[i]].setMap(null);
 			}
+			
 		} else {
 			$scope.results = [];
 			
@@ -202,7 +204,6 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 				$scope.markers[i].setMap($scope.map);		
 			}
 		}
-		
 		
 	});
 	
@@ -273,14 +274,24 @@ app.filter('highlight', function($sce) {
   }
 })
 
-app.filter('highlightPos', function($sce) {
-	return function(text, match) {
-  		var mark1 = match.indices[0][0];
-  		var mark2 = match.indices[0][1];
-    	if (mark2 && mark2 > mark1){
-    		text = text.insertAt(mark2+1, '</u>');
-    		text = text.insertAt(mark1, '<u>');
-   	}
+app.filter('highlightArray', function($sce) {
+	return function(array, phrase) {
+		var text = '';
+		if(phrase){
+			for (var i = 0; i< array.length; i++){
+				var loc = array[i];
+				if(loc.toLowerCase().indexOf(phrase.toLowerCase()) !== -1){
+					if(text == ''){
+						text = text + loc;
+					} else {
+						text = text + ', ' + loc;
+					}
+					
+				}			
+			}
+			text = text.replace(new RegExp('('+phrase+')', 'gi'),
+      '<u>$1</u>')
+		}
 
     	return $sce.trustAsHtml(' ' + text)
   }

@@ -36,7 +36,7 @@
 
 	<div class="col-md-3">
 		<div class="form-group">
-			<input type="text" class="form-control" id="search-field" placeholder="Search by ..." ng-model="searchQuery">
+			<input type="text" class="form-control" id="search-field" placeholder="Search by ..." ng-model="searchQuery" ng-model-options="{debounce:200}">
 		</div>
 		
 		<div class="list-group" id="list-warning" ng-hide="sucessful">
@@ -52,16 +52,15 @@
 			<a href="#" class="list-group-item" ng-repeat="m in results" ng-click="click(m.item.index)" ng-class="{'active': selected == m.item.index}" ng-show="searchQuery" ng-mouseenter="hoverIn(m.item.index)" ng-mouseleave="hoverOut(m.item.index)">
 				<h4 class="list-group-item-heading" ng-bind-html="m.item.title | highlight:searchQuery"></h4>
 				
-				<!-- Show the search query because Fuse.js does not retrieve matched index when searching in array
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'locations'}"><span class="glyphicon glyphicon-map-marker" title="Location"></span><span ng-bind-html="m.item.locations | highlight:searchQuery"></span></p>-->
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'release_year'}"><span class="glyphicon glyphicon-calendar" title="Year"></span><span ng-bind-html="m.item.release_year | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'production_company'}"><span class="glyphicon glyphicon-home" title="Production company"></span><span ng-bind-html="m.item.production_company | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'distributor'}"><span class="glyphicon glyphicon-cd" title="Distributor"></span><span ng-bind-html="m.item.distributor | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'director'}"><span class="glyphicon glyphicon-bullhorn" title="Director"></span><span ng-bind-html="m.item.director | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'writer'}"><span class="glyphicon glyphicon-pencil" title="Writer"></span><span ng-bind-html="m.item.writer | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_1'}"><span class="glyphicon glyphicon-user" title="Actor 1"></span><span ng-bind-html="m.item.actor_1 | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_2'}"><span class="glyphicon glyphicon-user" title="Actor 2"></span><span ng-bind-html="m.item.actor_2 | highlightPos:r"></span></p>
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_3'}"><span class="glyphicon glyphicon-user" title="Actor 3"></span><span ng-bind-html="m.item.actor_3 | highlightPos:r"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'locations'} | limitTo:1"><span class="glyphicon glyphicon-map-marker" title="Location"></span><span ng-bind-html="m.item.locations | highlightArray:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'release_year'}"><span class="glyphicon glyphicon-calendar" title="Year"></span><span ng-bind-html="m.item.release_year | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'production_company'}"><span class="glyphicon glyphicon-home" title="Production company"></span><span ng-bind-html="m.item.production_company | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'distributor'}"><span class="glyphicon glyphicon-cd" title="Distributor"></span><span ng-bind-html="m.item.distributor | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'director'}"><span class="glyphicon glyphicon-bullhorn" title="Director"></span><span ng-bind-html="m.item.director | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'writer'}"><span class="glyphicon glyphicon-pencil" title="Writer"></span><span ng-bind-html="m.item.writer | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_1'}"><span class="glyphicon glyphicon-user" title="Actor 1"></span><span ng-bind-html="m.item.actor_1 | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_2'}"><span class="glyphicon glyphicon-user" title="Actor 2"></span><span ng-bind-html="m.item.actor_2 | highlight:searchQuery"></span></p>
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'actor_3'}"><span class="glyphicon glyphicon-user" title="Actor 3"></span><span ng-bind-html="m.item.actor_3 | highlight:searchQuery"></span></p>
 			</a>
 		</div>
 	</div>
