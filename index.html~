@@ -52,8 +52,8 @@
 			<a href="#" class="list-group-item" ng-repeat="m in results" ng-click="click(m.item.index)" ng-class="{'active': selected == m.item.index}" ng-show="searchQuery" ng-mouseenter="hoverIn(m.item.index)" ng-mouseleave="hoverOut(m.item.index)">
 				<h4 class="list-group-item-heading" ng-bind-html="m.item.title | highlight:searchQuery"></h4>
 				
-				<!-- Show the search query because Fuse.js does not retrieve matched index when searching in array
-				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'locations'}"><span class="glyphicon glyphicon-map-marker" title="Location"></span><span ng-bind-html="m.item.locations | highlight:searchQuery"></span></p>-->
+				<!-- Show the search query because Fuse.js does not retrieve matched index when searching in array -->
+				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'locationsStr'}"><span class="glyphicon glyphicon-map-marker" title="Location"></span><span ng-bind-html="m.item.locationsStr | highlight:searchQuery"></span></p>
 				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'release_year'}"><span class="glyphicon glyphicon-calendar" title="Year"></span><span ng-bind-html="m.item.release_year | highlightPos:r"></span></p>
 				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'production_company'}"><span class="glyphicon glyphicon-home" title="Production company"></span><span ng-bind-html="m.item.production_company | highlightPos:r"></span></p>
 				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'distributor'}"><span class="glyphicon glyphicon-cd" title="Distributor"></span><span ng-bind-html="m.item.distributor | highlightPos:r"></span></p>
