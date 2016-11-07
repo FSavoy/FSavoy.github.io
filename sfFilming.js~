@@ -29,6 +29,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 		location: 0,
 		distance: 100,
 		maxPatternLength: 32,
+		matchAllTokens: true,
 		include: ["matches"],
 		keys: [
 			"title",

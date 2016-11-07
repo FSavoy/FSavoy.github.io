@@ -25,10 +25,11 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	
 	// The options for Fuse
 	var options = {
-		threshold: 0.2,
+		threshold: 0.1,
 		location: 0,
 		distance: 100,
 		maxPatternLength: 32,
+		matchAllTokens: true,
 		include: ["matches"],
 		keys: [
 			"title",
