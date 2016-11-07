@@ -46,14 +46,14 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 		}
 		
 		// Saving the data for geocoding
-		$scope.geocode(650);
+		$scope.geocode(0);
 		
 	}, function(response) {
 		console.log("Error loading data: " + response.statusText);
 	});
 	
 	$scope.$watch('index', function(){
-		if($scope.index >= $scope.locations.length && $scope.locations.length > 650){//done
+		if($scope.index >= $scope.locations.length && $scope.locations.length > 0){//done
 			$scope.currentLocation = "Done!";
 		} else {
 			if($scope.index != 0){
