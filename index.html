@@ -135,13 +135,13 @@
 	</div>
 	
 	<div class="modal fade in visible-sm visible-xs col-xs-12" style="display: block;" ng-hide="selected == null">
-		<div class="modal-dialog">    
+		<div class="modal-dialog" id="modal-box">    
 			<div class="modal-content">   
 				<div class="modal-header">
 					<h3 class="modal-title">{{ movies[selected].title }}</h3>
 				</div>
 			
-				<div class="modal-body">
+				<div class="modal-body" id="modal-panel">
 					<table class="table table-condensed">
 						<tr ng-show="movies[selected].locations[0]">
 							<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>

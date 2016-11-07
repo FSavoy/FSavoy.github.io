@@ -46,3 +46,12 @@ html, body {
     height: 100%;
     background:rgba(255,255,255,1);
 }
+
+#modal-box {
+	margin-top: 65px;
+}
+
+#modal-panel {
+	max-height: calc(100vh - 210px);
+	overflow-y: auto;
+}
