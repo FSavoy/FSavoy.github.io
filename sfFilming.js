@@ -278,9 +278,16 @@ app.filter('highlightArray', function($sce) {
 	return function(array, phrase) {
 		var text = '';
 		if(phrase){
+			words = phrase.split(" ");
 			for (var i = 0; i< array.length; i++){
 				var loc = array[i];
-				if(loc.toLowerCase().indexOf(phrase.toLowerCase()) !== -1){
+				var inside = true;
+				for(var j = 0; j < words.length; j++){
+					if(loc.toLowerCase().indexOf(words[j].toLowerCase()) == -1){
+						inside = false;
+					}
+				}
+				if(inside){
 					if(text == ''){
 						text = text + loc;
 					} else {
@@ -289,8 +296,12 @@ app.filter('highlightArray', function($sce) {
 					
 				}			
 			}
-			text = text.replace(new RegExp('('+phrase+')', 'gi'),
+			for(var j = 0; j < words.length; j++){
+				var word = words[j];
+				text = text.replace(new RegExp('('+word+')', 'gi'),
       '<u>$1</u>')
+			}
+			
 		}
 
     	return $sce.trustAsHtml(' ' + text)
