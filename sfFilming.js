@@ -100,6 +100,9 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			}
 		}
 		
+		// Saving the data for geocoding
+		localStorage.setItem('locations.json', JSON.stringify($scope.locations));
+		
 		for (var i = 0; i < $scope.locations.length; i++){
 			var marker = new google.maps.Marker({
     			position: {lat: 37.80 + 0.3*Math.random()-0.15, lng: -122.33 + 0.7*Math.random()-0.35},
