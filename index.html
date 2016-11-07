@@ -35,24 +35,39 @@
 		</div>
 	</nav>
 
+	<!-- Left side column -->
 	<div class="col-md-3">
 		<div class="form-group">
 			<input type="text" class="form-control" id="search-field" placeholder="Search by ..." ng-model="searchQuery" ng-model-options="{debounce:350}">
 		</div>
 		
+		<!-- Warning message when loading or if not sucessful -->
 		<div class="list-group" id="list-warning" ng-hide="sucessful">
 			<div class="list-group-item">
 				<p class="list-group-item-text">{{ infoText }}</p>
 			</div>
 		</div>
 		
+		<!-- If search results are empty -->
+		<div class="list-group" id="list-warning" ng-show="sucessful && results.length == 0 && searchQuery">
+			<div class="list-group-item">
+				<p class="list-group-item-text">No result</p>
+			</div>
+		</div>
+		
+		<!-- Listing movies -->
 		<div class="list-group" id="list-elems" ng-show="sucessful">
+		
+			<!-- If no search query -->
 			<a href="#" class="list-group-item" ng-repeat="m in movies" ng-click="click(m.index)" ng-class="{'active': selected == m.index}" ng-hide="searchQuery" ng-mouseenter="hoverIn(m.index)" ng-mouseleave="hoverOut(m.index)">
 				<h4 class="list-group-item-heading">{{ m.title }}</h4>
 			</a>
+			
+			<!-- If search query -->
 			<a href="#" class="list-group-item" ng-repeat="m in results" ng-click="click(m.item.index)" ng-class="{'active': selected == m.item.index}" ng-show="searchQuery" ng-mouseenter="hoverIn(m.item.index)" ng-mouseleave="hoverOut(m.item.index)">
 				<h4 class="list-group-item-heading" ng-bind-html="m.item.title | highlight:searchQuery"></h4>
 				
+				<!-- Show only one instance with all results appended (Fuse.js resulting match indexes are buggy) -->
 				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'locations'} | limitTo:1"><span class="glyphicon glyphicon-map-marker" title="Location"></span><span ng-bind-html="m.item.locations | highlightArray:searchQuery"></span></p>
 				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'release_year'}"><span class="glyphicon glyphicon-calendar" title="Year"></span><span ng-bind-html="m.item.release_year | highlight:searchQuery"></span></p>
 				<p class="list-group-item-text" ng-repeat="r in m.matches | filter:{key:'production_company'}"><span class="glyphicon glyphicon-home" title="Production company"></span><span ng-bind-html="m.item.production_company | highlight:searchQuery"></span></p>
@@ -66,9 +81,11 @@
 		</div>
 	</div>
 
-	<div class="col-md-9" id="map-content">
+	<!-- The right part -->
+	<div class="col-md-9 visible-md visible-lg" id="map-content">
 		<div class="panel panel-default" id="map"></div>
 		
+		<!-- Container for the detailed informations -->
 		<div class="panel panel-default" id="detail-panel" ng-hide="selected == null">
 			<div class="panel-heading">
 				<h3 class="panel-title">{{ movies[selected].title }}</h3>
@@ -78,7 +95,7 @@
 				<table class="table table-condensed">
 					<tr ng-show="movies[selected].locations[0]">
 						<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
-						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto left" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
+						<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto bottom" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
 					</tr>
 					<tr ng-show="movies[selected].release_year">
 						<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>
@@ -117,9 +134,60 @@
 		</div>
 	</div>
 	
-	<div class="visible-sm visible-xs" id="dimScreen">
-		<h2>Please use a wider screen</h2>
+	<div class="modal fade in visible-sm visible-xs col-xs-12" style="display: block;" ng-hide="selected == null">
+		<div class="modal-dialog">    
+			<div class="modal-content">   
+				<div class="modal-header">
+					<h3 class="modal-title">{{ movies[selected].title }}</h3>
+				</div>
+			
+				<div class="modal-body">
+					<table class="table table-condensed">
+						<tr ng-show="movies[selected].locations[0]">
+							<th><span class="glyphicon glyphicon-map-marker" title="Locations"></span></th>
+							<td><p class="list-group-item-text" ng-repeat="l in movies[selected].locations track by $index">{{$index+1}} - {{l}} <a uib-popover="{{movies[selected].fun_facts[$index]}}" popover-placement="auto left" popover-append-to-body="true" ng-show="movies[selected].fun_facts[$index]" class="glyphicon glyphicon-star-empty" title="Fun fact"></a></p></td>
+						</tr>
+						<tr ng-show="movies[selected].release_year">
+							<th><span class="glyphicon glyphicon-calendar" title="Year"></span></th>
+							<td>{{ movies[selected].release_year }}</td>
+						</tr>
+						<tr ng-show="movies[selected].production_company">
+							<th><span class="glyphicon glyphicon-home" title="Production company"></span></th>
+							<td>{{ movies[selected].production_company }}</td>
+						</tr>
+						<tr ng-show="movies[selected].distributor">
+							<th><span class="glyphicon glyphicon-cd" title="Distributor"></span></th>
+							<td>{{ movies[selected].distributor }}</td>
+						</tr>
+						<tr ng-show="movies[selected].director">
+							<th><span class="glyphicon glyphicon-bullhorn" title="Director"></span></th>
+							<td>{{ movies[selected].director }}</td>
+						</tr>
+						<tr ng-show="movies[selected].writer">
+							<th><span class="glyphicon glyphicon-pencil" title="Writer"></span></th>
+							<td>{{ movies[selected].writer }}</td>
+						</tr>
+						<tr ng-show="movies[selected].actor_1 && movies[selected].actor_2 && movies[selected].actor_3">
+							<th><span class="glyphicon glyphicon-user" title="Actors"></span></th>
+							<td>{{ movies[selected].actor_1 + ", " + movies[selected].actor_2 + " and " + movies[selected].actor_3 }}</td>
+						</tr>
+						<tr ng-show="movies[selected].actor_1 && movies[selected].actor_2 && !movies[selected].actor_3">
+							<th><span class="glyphicon glyphicon-user" title="Actors"></span></th>
+							<td>{{ movies[selected].actor_1 + " and " + movies[selected].actor_2 }}</td>
+						</tr>
+						<tr ng-show="movies[selected].actor_1 && !movies[selected].actor_2 && !movies[selected].actor_3">
+							<th><span class="glyphicon glyphicon-user" title="Actor"></span></th>
+							<td>{{ movies[selected].actor_1 }}</td>
+						</tr>
+					</table>
+				</div>
+				
+				<div class="modal-footer">        
+					<button type="button" class="btn btn-primary" ng-click="selected=null">Close</button>     
+				</div>    
+			</div>  
+		</div>
 	</div>
     
-  </body>
+	</body>
 </html>

@@ -18,17 +18,32 @@ $(document).ready(function(){
 var app = angular.module('sfFilming', ['ui.bootstrap']);
 
 app.controller('moviesCtrl', function($scope, $http, $sce) {
+	
+	// boolean: if loading the files is sucessful
 	$scope.sucessful = false;
+	
+	// Information text when loading files and if fail
 	$scope.infoText = "Loading...";
+	
+	// Movie instances (one per movie even if several locations)
+	$scope.movies = [];
+	
+	// Pointer to the selected movie in the movies array
 	$scope.selected = null;
+	
+	// The string to search into movies
 	$scope.searchQuery = "";
 	
-	$scope.movies = []; // Stores all the movies instances
+	// Locations (one location can have several movies)
 	$scope.locations = []; // Stores all the locations
-	$scope.locationsMoviesIdx = []; // Stores the movies indexes corresponding to the locations
+	
+	// Pointers to the movies (in $scope.movies) for each element of $scope.locations
+	$scope.locationsMoviesIdx = [];
+	
+	// Markers on the map
 	$scope.markers = [];
 	
-	// The options for Fuse
+	// The options for Fuse.js fuzzy search
 	var options = {
 		threshold: 0.05,
 		location: 0,
@@ -52,11 +67,13 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	};
 	
 	$scope.fuse = new Fuse($scope.movies, options);
+	
+	// Movies after filtering
 	$scope.results = [];
 	
 	$scope.map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 13,
-		center: {lat: 37.780492, lng: -122.425879},
+		center: {lat: 37.782665, lng: -122.391285},
 	});
 	
 	// The marker image when not selected
@@ -65,39 +82,47 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
       scaledSize: new google.maps.Size(20, 20)
    };
 	
+	// Loading the database
 	$http.get("https://data.sfgov.org/resource/wwmu-gmzc.json")
-	.then(function(response) {
+	.then(function(respData) {
 		
+		// Loading the geocoding database, generated offline
 		$http.get("geocoding.json")
-		.then(function(response1){
+		.then(function(respGeo){
 			
-			var retrieved = response.data;
-			var geocoding = response1.data;
+			var retrieved = respData.data;
+			var geocoding = respGeo.data;
 			
+			// Same movies should follow each other
 			retrieved.sort(function(a, b) {
 				return [a.title, a.release_year].join().localeCompare([b.title, b.release_year].join());
 			});
 		
 			//Merging same movies with several locations and associated fun facts
-			var itMovies = 0;
-			for (var i = 0; i< retrieved.length; i++) {
+			var itMovies = 0; // Index of the movie (can have several retrieved rows)
+			for (var i = 0; i < retrieved.length; i++) {
 				var elem = retrieved[i];
+				
 				if(elem.locations != null){
+					
 					var locIdx = $scope.locations.indexOf(elem.locations);
-					if (locIdx == -1) {
+					if (locIdx == -1) { // Location does not exist yet
 						$scope.locations.push(elem.locations);
 						$scope.locationsMoviesIdx.push([itMovies]);
 						locIdx = $scope.locations.length - 1;
-					} else {
+					} else { // Location exists, adding pointer
 						$scope.locationsMoviesIdx[locIdx].push(itMovies);
 					}
 				}
 			
+				// This row corresponds to a new movie
 				if(i == 0 || elem.title != $scope.movies[itMovies -1].title || elem.release_year != $scope.movies[itMovies -1].release_year){
 					elem.index = itMovies;
+					
+					// Modifying location information to contain an array
 					if(elem.locations != null){
 						elem.locations = [elem.locations];
-						elem.locationsIdx = [locIdx];
+						elem.locationsIdx = [locIdx]; // Stores pointers to $scope.locations for that movie 
 						elem.fun_facts = [elem.fun_facts];
 					} else {
 						elem.locations = [];
@@ -106,17 +131,18 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 					}
 					$scope.movies.push(elem);
 					itMovies = itMovies + 1;
-				} else if(elem.locations != null) {
+				} else if(elem.locations != null) { // Same movie as previous row
 					$scope.movies[itMovies -1].locations.push(elem.locations);
 					$scope.movies[itMovies -1].locationsIdx.push(locIdx);
 					$scope.movies[itMovies -1].fun_facts.push(elem.fun_facts);
 				}
 			}
 		
+			// Initialize the markers
 			for (var i = 0; i < $scope.locations.length; i++){
-				// Look for coordinates in the geocoding table, otherwise random
-				var thislat = 37.80;// + 0.3*Math.random()-0.15;
-				var thislng = -122.33;// + 0.7*Math.random()-0.35;
+				// Look for coordinates in the geocoding table, otherwise pre-set
+				var thislat = 37.80;
+				var thislng = -122.33;
 				for(var j = 0; j < geocoding.length; j++){
 					if(geocoding[j].location == $scope.locations[i]){
     					thislat = geocoding[j].lat;
@@ -150,30 +176,31 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 				$scope.markers.push(marker);
 			}
 		
+			// We are done, with success!
 			$scope.sucessful = true;
 			$scope.infoText = "Sucess";
-			$scope.selected = 0;
+			$scope.selected = 0; // Show details for the first movie of the row
 		
-		}, function(response1) {
-			$scope.infoText = "Error loading data: " + response1.statusText;
+		}, function(respGeo) { // Loading geocoding failed
+			$scope.infoText = "Error loading data: " + respGeo.statusText;
 		});
 		
 
-	}, function(response) {
-		$scope.infoText = "Error loading data: " + response.statusText;
+	}, function(respData) { // Loading movie database failed
+		$scope.infoText = "Error loading data: " + respData.statusText;
 	});
 	
 	// Updating the results of the search when the search term is changed
 	$scope.$watch('searchQuery', function(newVal,oldVal){
 
-		if($scope.searchQuery){
+		if($scope.searchQuery){ // Searching for something
 			var searchQueryNoParenthesis = $scope.searchQuery.replace(/[()]/g, '')
 			$scope.results = $scope.fuse.search(searchQueryNoParenthesis);
 			
-			// Check in the next loop if the selected movie is still in the list of results
+			// Check in the next loop if the selected movie is still in the list of results, otherwise we de-select it
 			var removeSelected = true;
 			
-			// Updating the markers (hiding)
+			// Updating the markers (hiding those not in the results)
 			var toShow = [];
 			for(var i = 0; i < $scope.results.length; i++){
 				toShow = toShow.concat($scope.results[i].item.locationsIdx);
@@ -188,6 +215,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			}			
 			
 			toShow = uniq(toShow);
+			// Show the markers in toShow
 			for(var i = 0; i < toShow.length; i++){
 				$scope.markers[toShow[i]].setMap($scope.map);		
 			}
@@ -197,11 +225,12 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			toHide = toHide.filter( function( el ) {
 				return toShow.indexOf( el ) < 0;
 			});
+			// Hide them
 			for(var i = 0; i < toHide.length; i++){
 				$scope.markers[toHide[i]].setMap(null);
 			}
 			
-		} else {
+		} else { // Searching for nothing
 			$scope.results = [];
 			
 			// Show all markers
@@ -215,7 +244,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	// Changing colors and numbers of markers when a movie is selected
 	$scope.$watch('selected',function(newVal,oldVal){
 
-		if (oldVal != null){
+		if (oldVal != null){ // Set the markers of previous selected to normal
 			var selectedMovieLocs = $scope.movies[oldVal].locationsIdx;
 			for (var m = 0; m < selectedMovieLocs.length; m++){
 				var locIdx = selectedMovieLocs[m];
@@ -223,27 +252,17 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 			}
 		}
 		
-		if (newVal != null){
+		if (newVal != null){ // Put big markers for selected ones
 			var selectedMovieLocs = $scope.movies[newVal].locationsIdx;
 			for (var m = 0; m < selectedMovieLocs.length; m++){
 				var locIdx = selectedMovieLocs[m];
-				if(m+1 < 10){
-					var markerLabel = {
-   					fontSize: '14',
-   					text: (m+1).toString()
-   				}
-				} else {
-					var markerLabel = {
-   					fontSize: '12',
-   					text: (m+1).toString()
-   				}
-				}
 				$scope.markers[locIdx].setAnimation(null);
 				$scope.markers[locIdx].setIcon('markers/icon-big-' + (m+1).toString() + '.png');
 			}
 		}
 	});
     
+	// When click on a movie in the list, display information
 	$scope.click = function(index){
 		if($scope.selected == index){
 			$scope.selected = null;
@@ -252,6 +271,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 		}
 	};
 	
+	// Make the markers bounce when mouse is over a movie
 	$scope.hoverIn = function(index){
 		if (index != $scope.selected){
 			var indices = $scope.movies[index].locationsIdx;
@@ -261,6 +281,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 		}
 	};
 	
+	// Make the markers stop bouncing when mouse is gone
 	$scope.hoverOut = function(index){
 		var indices = $scope.movies[index].locationsIdx;
 		for(var i = 0; i < indices.length ; i++){
@@ -270,6 +291,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
     
 });
 
+// Underlines the search term in the string
 app.filter('highlight', function($sce) {
   return function(text, phrase) {
     if (phrase) text = text.replace(new RegExp('('+phrase+')', 'gi'),
@@ -279,6 +301,7 @@ app.filter('highlight', function($sce) {
   }
 })
 
+// Finds the elements in an array of strings matching the search term and underlines it
 app.filter('highlightArray', function($sce) {
 	return function(array, phrase) {
 		var text = '';
@@ -287,7 +310,7 @@ app.filter('highlightArray', function($sce) {
 			for (var i = 0; i< array.length; i++){
 				var loc = array[i];
 				
-				// If full phrase in inside
+				// First check if full sentense is inside
 				if(loc.toLowerCase().indexOf(phrase.toLowerCase()) != -1){
 					loc = loc.replace(new RegExp('('+phrase+')', 'gi'),'<u>$1</u>')
 					
@@ -296,7 +319,7 @@ app.filter('highlightArray', function($sce) {
 					} else {
 						text = text + ', ' + loc;
 					}
-				} else { // Check if all the words are inside
+				} else { // Check if all the words are inside separately
 					var inside = true;
 					for(var j = 0; j < words.length; j++){
 						if(loc.toLowerCase().indexOf(words[j].toLowerCase()) == -1){
@@ -324,18 +347,3 @@ app.filter('highlightArray', function($sce) {
   }
 })
 
-// For popover to appear
-app.directive('tooltip', function(){
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs){
-            $(element).hover(function(){
-                // on mouseenter
-                $(element).tooltip('show');
-            }, function(){
-                // on mouseleave
-                $(element).tooltip('hide');
-            });
-        }
-    };
-});
