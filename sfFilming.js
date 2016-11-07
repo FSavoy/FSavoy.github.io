@@ -73,7 +73,7 @@ app.controller('moviesCtrl', function($scope, $http, $sce) {
 	
 	$scope.map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 13,
-		center: {lat: 37.782665, lng: -122.391285},
+		center: {lat: 37.7749295, lng: -122.41941550000001},
 	});
 	
 	// The marker image when not selected
